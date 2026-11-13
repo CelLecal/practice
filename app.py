@@ -6,6 +6,9 @@ app = Flask(__name__)
 def index():
     return "Hello, Flask!"
 
+@app.route('/about')
+def about():
+    return "Это учебный список задач на Flask."
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
