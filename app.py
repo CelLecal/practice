@@ -10,6 +10,7 @@ def get_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+    
 
 
 def fetch_all_tasks():
@@ -34,15 +35,33 @@ def index():
                 error='Название задачи не может быть пустым.'
             )
 
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+
+        if not title:
+            return render_template(
+                'index.html',
+                items=fetch_all_tasks(),
+                error='Название задачи не может быть пустым.'
+            )
+
         conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO tasks (title) VALUES (?)", (title,))
-        conn.commit()
-        conn.close()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO tasks (title) VALUES (?)", (title,))
+            conn.commit()
+        except sqlite3.Error as e:
+            conn.rollback()
+            print(f"[DB ERROR] {e}")
+            return render_template(
+                'index.html',
+                items=fetch_all_tasks(),
+                error='Не удалось сохранить задачу. Попробуйте ещё раз.'
+            )
+        finally:
+            conn.close()
 
-        return redirect(url_for('index'))
-
-    return render_template('index.html', items=fetch_all_tasks())
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
