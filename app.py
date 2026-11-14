@@ -10,31 +10,23 @@ def get_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
-    
 
 
 def fetch_all_tasks():
-    """Возвращает все задачи. Используется и в GET, и в POST-ошибке."""
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, title, status FROM tasks ORDER BY id")
-    rows = cursor.fetchall()
-    conn.close()
-    return rows
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, title, status FROM tasks ORDER BY id")
+        return cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] {e}")
+        return []
+    finally:
+        conn.close()
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if request.method == 'POST':
-        title = request.form.get('title', '').strip()
-
-        if not title:
-            return render_template(
-                'index.html',
-                items=fetch_all_tasks(),
-                error='Название задачи не может быть пустым.'
-            )
-
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
 
@@ -61,7 +53,9 @@ def index():
         finally:
             conn.close()
 
-    return redirect(url_for('index'))
+        return redirect(url_for('index'))
+
+    return render_template('index.html', items=fetch_all_tasks())
 
 
 if __name__ == '__main__':
