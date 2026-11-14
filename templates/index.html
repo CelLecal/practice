@@ -15,6 +15,32 @@
             color: #333;
         }
 
+        form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
         ul {
             list-style: none;
             padding: 0;
@@ -36,11 +62,25 @@
             color: #999;
             font-style: italic;
         }
+
+        .error {
+            color: #c00;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 
 <body>
     <h1>Мой список задач</h1>
+
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('index') }}">
+        <input type="text" name="title" placeholder="Новая задача..." required>
+        <button type="submit">Добавить</button>
+    </form>
 
     {% if items %}
     <ul>
